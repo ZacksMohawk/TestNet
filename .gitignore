@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+*.log
+nohup.out
+
+env.json
+test.def.json

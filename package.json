@@ -1,0 +1,24 @@
+{
+  "name": "testnet",
+  "version": "1.0.0",
+  "main": "TestNet.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zack's Mohawk Limited",
+  "license": "ISC",
+  "description": "## Overview",
+  "dependencies": {
+    "prompt-sync": "^4.2.0",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ZacksMohawk/TestNet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZacksMohawk/TestNet/issues"
+  },
+  "homepage": "https://github.com/ZacksMohawk/TestNet#readme"
+}
