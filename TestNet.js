@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.0";
+global.version = "1.0.1";
 
 const fs = require('fs');
 const express = require('express');
@@ -180,10 +180,15 @@ function recursivelyRunTests(tests, index, callbackFunction){
 	}
 	test.url = processUrlParams(test.url);
 
+	let testStartTime = Date.now();
+
 	if (test.type == GET){
 		RequestUtils.sendGetRequest(test.url, test.headers ? test.headers : {}, 
 			// successFunction
 			function(body, statusCode){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
 				if (expectedResponse.type == null){
 					if (expectedResponse.code == null){
 						recordFailure(test, null, null, "No expected status code provided");
@@ -249,6 +254,9 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			},
 			// failFunction
 			function(statusCode){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
 				if (expectedResponse.code != null && expectedResponse.code == statusCode){
 					recordSuccess(test);
 				}
@@ -259,6 +267,9 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			},
 			// noResponseFunction
 			function(){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
 				if (expectedResponse.code != null && expectedResponse.code == 521){
 					recordSuccess(test);
 				}
@@ -303,8 +314,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			postFunction = RequestUtils.sendPostFormRequest;
 			postData = test.form;
 		}
-
-		let testStartTime = Date.now();
 
 		postFunction(test.url, test.headers ? test.headers : {}, postData, 
 			// successFunction
@@ -377,6 +386,9 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			},
 			// failFunction
 			function(statusCode){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
 				if (expectedResponse.code != null && expectedResponse.code == statusCode){
 					recordSuccess(test);
 				}
@@ -387,6 +399,9 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			},
 			// noResponseFunction
 			function(){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
 				if (expectedResponse.code != null && expectedResponse.code == 521){
 					recordSuccess(test);
 				}
@@ -477,7 +492,8 @@ function checkNfrs(test){
 function recordFailure(test, body, errorCode, customMessage){
 	Logger.log("🔴 [" + (test.type ? test.type : '?') + "] " + test.title + 
 		(errorCode ? ' [ERROR ' + errorCode + ']' : '') + 
-		(customMessage ? ' - ' + customMessage : ''));
+		(customMessage ? ' - ' + customMessage : '') + 
+		(test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	failedTests.push(test);
 }
 
