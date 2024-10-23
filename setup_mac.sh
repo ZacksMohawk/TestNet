@@ -19,7 +19,7 @@ if [[ "$TESTNETSET" != true ]]; then
 		NEWLINESET=true
 	fi
 	echo "Setting 'testnet' alias";
-	echo "alias testnet='dt=\$(pwd); cd $(pwd); node TestNet.js -folderPath \$dt; cd \$dt;'" >> ~/.zshrc
+	echo "alias testnet='dt=\$(pwd); cd $(pwd); node --no-warnings TestNet.js -folderPath \$dt; cd \$dt;'" >> ~/.zshrc
 fi
 
 source ~/.zshrc
