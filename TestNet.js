@@ -213,6 +213,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
+							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -233,6 +234,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
+							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -337,7 +339,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 
 				if (expectedResponse.type == TYPE_TEXT){
 					if (expectedResponse.content != null){
-						if (JSON.stringify(expectedResponse.content) == body){
+						if (expectedResponse.content == body){
 							if (expectedResponse.code == null || statusCode == expectedResponse.code){
 								recordSuccess(test);
 							}
@@ -346,6 +348,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
+							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -365,6 +368,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
+							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -495,6 +499,9 @@ function recordFailure(test, body, errorCode, customMessage){
 		(customMessage ? ' - ' + customMessage : '') + 
 		(test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	failedTests.push(test);
+	if (test.response){
+		Logger.log("---> " + test.response);
+	}
 }
 
 function displayTestResults(){
