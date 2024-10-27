@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.2";
+global.version = "1.0.3";
 
 const fs = require('fs');
 const express = require('express');
@@ -24,6 +24,7 @@ let responseValues = {};
 
 let passedTests = [];
 let failedTests = [];
+let failedTestsFilePath = 'failed.json';
 
 
 function chooseTests(){
@@ -511,18 +512,37 @@ function displayTestResults(){
 	Logger.log("Tests passed: " + passedTests.length + " / " + (passedTests.length + failedTests.length) + " (" + percentagePassed + "%)\n");
 
 	if (failedTests.length > 0){
+		let testsToReRun = failedTests.slice(0);
+		passedTests = [];
+		failedTests = [];
 		let rerunFailedTestsOnly = prompt("Would you like to re-run failed tests only (y/n)?: ");
 		if (rerunFailedTestsOnly != null && rerunFailedTestsOnly.toLowerCase().trim() == ("y")){
-			let testsToReRun = failedTests.slice(0);
-			passedTests = [];
-			failedTests = [];
 			Logger.log("\nRe-running failed tests...\n");
 			recursivelyRunTests(testsToReRun, 0, function(){
 				displayTestResults();
 			});
 		}
+		else {
+			fs.writeFileSync(failedTestsFilePath, JSON.stringify(testsToReRun));
+		}
 	}
 }
 
+function handleStartup(){
+	if (fs.existsSync(failedTestsFilePath)){
+		let testsToReRun = JSON.parse(fs.readFileSync(failedTestsFilePath, 'utf-8'));
+		fs.unlinkSync(failedTestsFilePath);
+		let rerunFailedTestsOnly = prompt("Previously failed tests found. Would you like to re-run these failed tests only (y/n)?: ");
+		if (rerunFailedTestsOnly != null && rerunFailedTestsOnly.toLowerCase().trim() == ("y")){
+			Logger.log("\nRe-running failed tests...\n");
+			recursivelyRunTests(testsToReRun, 0, function(){
+				displayTestResults();
+			});
+			return;
+		}
+	}
+	chooseTests();
+}
+
 loadStoredInputValues();
-chooseTests();
+handleStartup();
