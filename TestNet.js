@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.1";
+global.version = "1.0.2";
 
 const fs = require('fs');
 const express = require('express');
@@ -204,6 +204,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 
 				if (expectedResponse.type == TYPE_TEXT){
 					if (expectedResponse.content != null){
+						test.response = body;
 						if (expectedResponse.content == body){
 							if (expectedResponse.code == null || statusCode == expectedResponse.code){
 								recordSuccess(test);
@@ -213,7 +214,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
-							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -225,6 +225,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 				}
 				else if (expectedResponse.type == TYPE_JSON){
 					if (expectedResponse.content != null){
+						test.response = body;
 						if (JSON.stringify(expectedResponse.content) == body){
 							if (expectedResponse.code == null || statusCode == expectedResponse.code){
 								recordSuccess(test);
@@ -234,7 +235,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
-							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -339,6 +339,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 
 				if (expectedResponse.type == TYPE_TEXT){
 					if (expectedResponse.content != null){
+						test.response = body;
 						if (expectedResponse.content == body){
 							if (expectedResponse.code == null || statusCode == expectedResponse.code){
 								recordSuccess(test);
@@ -348,7 +349,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
-							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -359,6 +359,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 				}
 				else if (expectedResponse.type == TYPE_JSON){
 					if (expectedResponse.content != null){
+						test.response = body;
 						if (JSON.stringify(expectedResponse.content) == body){
 							if (expectedResponse.code == null || statusCode == expectedResponse.code){
 								recordSuccess(test);
@@ -368,7 +369,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 							}
 						}
 						else {
-							test.response = body;
 							recordFailure(test, body, null, "Expected content does not match");
 						}	
 					}
@@ -437,12 +437,11 @@ function processUrlParams(url){
 			else if (responseValues[trimmedParamValue]){
 				paramPair[1] = responseValues[trimmedParamValue];
 			}
-
-			if (rebuiltParamSection){
-				rebuiltParamSection += "&";
-			}
-			rebuiltParamSection += paramPair[0] + "=" + paramPair[1];
 		}
+		if (rebuiltParamSection){
+			rebuiltParamSection += "&";
+		}
+		rebuiltParamSection += paramPair[0] + "=" + paramPair[1];
 	}
 	return preParamSection + "?" + rebuiltParamSection;
 }
@@ -500,7 +499,8 @@ function recordFailure(test, body, errorCode, customMessage){
 		(test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	failedTests.push(test);
 	if (test.response){
-		Logger.log("---> " + test.response);
+		Logger.log("  Expected ---> " + test.expected.content);
+		Logger.log("  Actual ---> " + test.response);
 	}
 }
 
