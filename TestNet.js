@@ -537,9 +537,9 @@ function displayTestResults(){
 
 function handleStartup(){
 	if (fs.existsSync(failedTestsFilePath)){
-		let failedTestsData = JSON.parse(fs.readFileSync(failedTestsFilePath, 'utf-8'));
-		let testsToReRun = failedTestsData.tests;
-		if (failedTestsData.allowSelfSigned){
+		chosenTestSet = JSON.parse(fs.readFileSync(failedTestsFilePath, 'utf-8'));
+		let testsToReRun = chosenTestSet.tests;
+		if (chosenTestSet.allowSelfSigned){
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		}
 		fs.unlinkSync(failedTestsFilePath);
