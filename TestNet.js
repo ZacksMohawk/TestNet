@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.3";
+global.version = "1.0.4";
 
 const fs = require('fs');
 const express = require('express');
@@ -22,6 +22,7 @@ let inputValues = {};
 let storedInputValues = {};
 let responseValues = {};
 
+let chosenTestSet;
 let passedTests = [];
 let failedTests = [];
 let failedTestsFilePath = 'failed.json';
@@ -56,7 +57,7 @@ function chooseTests(){
 	}
 	let testChoiceKey = testNameArray[testChoiceIndex - 1];
 
-	let chosenTestSet = testDefinitionData[testChoiceKey];
+	chosenTestSet = testDefinitionData[testChoiceKey];
 	if (chosenTestSet.allowSelfSigned){
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 	}
@@ -523,14 +524,24 @@ function displayTestResults(){
 			});
 		}
 		else {
-			fs.writeFileSync(failedTestsFilePath, JSON.stringify(testsToReRun));
+			let failedTestsData = {
+				"tests" : testsToReRun
+			}
+			if (chosenTestSet.allowSelfSigned){
+				failedTestsData.allowSelfSigned = true;
+			}
+			fs.writeFileSync(failedTestsFilePath, JSON.stringify(failedTestsData));
 		}
 	}
 }
 
 function handleStartup(){
 	if (fs.existsSync(failedTestsFilePath)){
-		let testsToReRun = JSON.parse(fs.readFileSync(failedTestsFilePath, 'utf-8'));
+		let failedTestsData = JSON.parse(fs.readFileSync(failedTestsFilePath, 'utf-8'));
+		let testsToReRun = failedTestsData.tests;
+		if (failedTestsData.allowSelfSigned){
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+		}
 		fs.unlinkSync(failedTestsFilePath);
 		let rerunFailedTestsOnly = prompt("Previously failed tests found. Would you like to re-run these failed tests only (y/n)?: ");
 		if (rerunFailedTestsOnly != null && rerunFailedTestsOnly.toLowerCase().trim() == ("y")){
