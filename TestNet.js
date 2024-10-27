@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.4";
+global.version = "1.0.5";
 
 const fs = require('fs');
 const express = require('express');
@@ -29,6 +29,12 @@ let failedTestsFilePath = 'failed.json';
 
 
 function chooseTests(){
+	// TODO Check for test.def.json file in current folder first, and use that if exists
+	if (!fs.existsSync(testDefFilePath)){
+		Logger.log("** No test.def.json file present - please create one **");
+		Logger.log("Defaulting to example.test.def.json for demonstration purposes");
+		testDefFilePath = 'example.test.def.json';
+	}
 	let testDefinitionData;
 	try {
 		testDefinitionData = JSON.parse(fs.readFileSync(testDefFilePath, 'utf8'));

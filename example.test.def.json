@@ -1,0 +1,89 @@
+{
+	"My Server Tests (use with MockNet)" : {
+		"allowSelfSigned" : true,
+		"tests" : [
+			{
+				"title" : "Get Test 1",
+				"type" : "GET",
+				"url" : "https://my.server:8888",
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Homepage!"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 2",
+				"type" : "GET",
+				"url" : "https://my.server:8888/user?user=Jeff",
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Jeff's data"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 3",
+				"type" : "GET",
+				"url" : "https://my.server:8888/nope",
+				"expected" : {
+					"code" : 404,
+					"type" : "text",
+					"content" : "Not found"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Post Test 1",
+				"type" : "POST",
+				"url" : "https://my.server:8888",
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Homepage post!"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Post Test 2",
+				"type" : "POST",
+				"url" : "https://my.server:8888/login",
+				"form" : {
+					"username" : "Jeff",
+					"password" : "Hello"
+				},
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Login successful"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Post Test 3",
+				"type" : "POST",
+				"url" : "https://my.server:8888/nope",
+				"expected" : {
+					"code" : 404,
+					"type" : "text",
+					"content" : "Not found post"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			}
+		]
+	}
+}
