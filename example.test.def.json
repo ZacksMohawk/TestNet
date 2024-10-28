@@ -3,45 +3,6 @@
 		"useSSL" : false,
 		"tests" : [
 			{
-				"title" : "Get Test 1",
-				"type" : "GET",
-				"url" : "my.server:8888",
-				"expected" : {
-					"code" : 200,
-					"type" : "text",
-					"content" : "Homepage!"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
-				"title" : "Get Test 2",
-				"type" : "GET",
-				"url" : "my.server:8888/user?user=Jeff",
-				"expected" : {
-					"code" : 200,
-					"type" : "text",
-					"content" : "Jeff's data"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
-				"title" : "Get Test 3",
-				"type" : "GET",
-				"url" : "my.server:8888/nope",
-				"expected" : {
-					"code" : 404,
-					"type" : "text",
-					"content" : "Not found"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
 				"title" : "Post Test 1",
 				"type" : "POST",
 				"url" : "my.server:8888",
@@ -65,8 +26,11 @@
 				"expected" : {
 					"code" : 200,
 					"type" : "text",
-					"content" : "Login successful"
+					"content" : "Xjd7jBFlk09Sgj-3kGkadfg43@fdG-VGahs"
 				},
+				"responseValues" : [
+					"sessionToken"
+				],
 				"nfr" : {
 					"maxResponseTime" : 200
 				}
@@ -79,6 +43,62 @@
 					"code" : 404,
 					"type" : "text",
 					"content" : "Not found post"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 1",
+				"type" : "GET",
+				"url" : "my.server:8888",
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Homepage!"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 2",
+				"type" : "GET",
+				"url" : "my.server:8888/user?user=Jeff",
+				"headers" : {
+					"sessiontoken" : "<sessionToken>"
+				},
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Jeff's data"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 3",
+				"type" : "GET",
+				"url" : "my.server:8888/user?user=Jeff",
+				"headers" : {
+					"sessiontoken" : "invalidtoken"
+				},
+				"expected" : {
+					"code" : 401
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 4",
+				"type" : "GET",
+				"url" : "my.server:8888/nope",
+				"expected" : {
+					"code" : 404,
+					"type" : "text",
+					"content" : "Not found"
 				},
 				"nfr" : {
 					"maxResponseTime" : 200
@@ -91,45 +111,6 @@
 		"allowSelfSigned" : true,
 		"tests" : [
 			{
-				"title" : "Get Test 1",
-				"type" : "GET",
-				"url" : "my.server:8888",
-				"expected" : {
-					"code" : 200,
-					"type" : "text",
-					"content" : "Homepage!"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
-				"title" : "Get Test 2",
-				"type" : "GET",
-				"url" : "my.server:8888/user?user=Jeff",
-				"expected" : {
-					"code" : 200,
-					"type" : "text",
-					"content" : "Jeff's data"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
-				"title" : "Get Test 3",
-				"type" : "GET",
-				"url" : "my.server:8888/nope",
-				"expected" : {
-					"code" : 404,
-					"type" : "text",
-					"content" : "Not found"
-				},
-				"nfr" : {
-					"maxResponseTime" : 200
-				}
-			},
-			{
 				"title" : "Post Test 1",
 				"type" : "POST",
 				"url" : "my.server:8888",
@@ -153,8 +134,11 @@
 				"expected" : {
 					"code" : 200,
 					"type" : "text",
-					"content" : "Login successful"
+					"content" : "Xjd7jBFlk09Sgj-3kGkadfg43@fdG-VGahs"
 				},
+				"responseValues" : [
+					"sessionToken"
+				],
 				"nfr" : {
 					"maxResponseTime" : 200
 				}
@@ -167,6 +151,62 @@
 					"code" : 404,
 					"type" : "text",
 					"content" : "Not found post"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 1",
+				"type" : "GET",
+				"url" : "my.server:8888",
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Homepage!"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 2",
+				"type" : "GET",
+				"url" : "my.server:8888/user?user=Jeff",
+				"headers" : {
+					"sessiontoken" : "<sessionToken>"
+				},
+				"expected" : {
+					"code" : 200,
+					"type" : "text",
+					"content" : "Jeff's data"
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 3",
+				"type" : "GET",
+				"url" : "my.server:8888/user?user=Jeff",
+				"headers" : {
+					"sessiontoken" : "invalidtoken"
+				},
+				"expected" : {
+					"code" : 401
+				},
+				"nfr" : {
+					"maxResponseTime" : 200
+				}
+			},
+			{
+				"title" : "Get Test 4",
+				"type" : "GET",
+				"url" : "my.server:8888/nope",
+				"expected" : {
+					"code" : 404,
+					"type" : "text",
+					"content" : "Not found"
 				},
 				"nfr" : {
 					"maxResponseTime" : 200

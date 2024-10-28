@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.7";
+global.version = "1.0.8";
 
 const fs = require('fs');
 const express = require('express');
@@ -530,7 +530,7 @@ function recordSuccess(test){
 		failedTests.push(test);
 		return;
 	}
-	Logger.log("🟢 [" + (test.type ? test.type : '?') + "] " + test.title + (test.responseTime ? "   " + test.responseTime + "ms" : ""));
+	Logger.log("🟢 [" + (test.type ? test.type : '?') + " " + test.url + "]   " + test.title + (test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	passedTests.push(test);
 }
 
@@ -540,7 +540,7 @@ function checkNfrs(test){
 	}
 	if (test.nfr.maxResponseTime){
 		if (test.responseTime && test.responseTime > test.nfr.maxResponseTime){
-			Logger.log("🟡 [" + (test.type ? test.type : '?') + "] " + test.title + "   " + test.responseTime + "ms (slow response)");
+			Logger.log("🟡 [" + (test.type ? test.type : '?') + " " + test.url + "]   " + test.title + "   " + test.responseTime + "ms (slow response)");
 			return false;
 		}
 	}
@@ -549,12 +549,12 @@ function checkNfrs(test){
 }
 
 function recordFailure(test, body, errorCode, customMessage){
-	Logger.log("🔴 [" + (test.type ? test.type : '?') + "] " + test.title + 
+	Logger.log("🔴 [" + (test.type ? test.type : '?') + " " + test.url + "] " + test.title + 
 		(errorCode ? ' [ERROR ' + errorCode + ']' : '') + 
 		(customMessage ? ' - ' + customMessage : '') + 
 		(test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	failedTests.push(test);
-	if (test.response){
+	if (test.response != null){
 		Logger.log("  Expected ---> " + test.expected.content);
 		Logger.log("  Actual ---> " + test.response);
 	}
