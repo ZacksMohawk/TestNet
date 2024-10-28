@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.5";
+global.version = "1.0.6";
 
 const fs = require('fs');
 const express = require('express');
@@ -67,7 +67,7 @@ function chooseTests(){
 	if (chosenTestSet.allowSelfSigned){
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 	}
-	let tests = chosenTestSet.tests;
+	let tests = preProcessTests(chosenTestSet);
 
 	gatherInputValues(chosenTestSet, testChoiceKey);
 
@@ -76,6 +76,42 @@ function chooseTests(){
 	recursivelyRunTests(tests, 0, function(){
 		displayTestResults();
 	});
+}
+
+function preProcessTests(chosenTestSet){
+
+	let tests = chosenTestSet.tests;
+
+	if (chosenTestSet.useSSL == null){
+		return tests;
+	}
+
+	for (let index = 0; index < tests.length; index++){
+		let test = tests[index];
+		if (chosenTestSet.useSSL){
+			if (test.url.startsWith("https:")){
+				// do nothing
+			}
+			else if (test.url.startsWith("http:")){
+				test.url = test.url.replace("http:", "https:");
+			}
+			else {
+				test.url = "https://" + test.url;
+			}
+		}
+		else {
+			if (test.url.startsWith("https:")){
+				test.url = test.url.replace("https:", "http:");
+			}
+			else if (test.url.startsWith("http:")){
+				// do nothing
+			}
+			else {
+				test.url = "http://" + test.url;
+			}
+		}
+	}
+	return tests;
 }
 
 function gatherInputValues(chosenTestSet, testChoiceKey){
