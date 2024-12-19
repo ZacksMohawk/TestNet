@@ -2,7 +2,6 @@ global.appType = "TestNet";
 global.version = "1.0.8";
 
 const fs = require('fs');
-const express = require('express');
 const prompt = require("prompt-sync")();
 const RequestUtils = require('./includes/RequestUtils');
 const Logger = require('./includes/Logger');
