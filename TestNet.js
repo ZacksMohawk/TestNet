@@ -7,7 +7,7 @@ const RequestUtils = require('./includes/RequestUtils');
 const Logger = require('./includes/Logger');
 
 Logger.log();
-Logger.log(fs.readFileSync('AppLogo.txt', 'utf8').replace('[version]', 'TestNet v' + version));
+Logger.log(fs.readFileSync('AppLogo.txt', 'utf8').replace('[version]', 'TestNet v' + version), "FgGreen");
 Logger.log();
 
 const GET = "GET";
