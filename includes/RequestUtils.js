@@ -15,7 +15,7 @@ function sendPostFormRequest(url, headers, formData, successFunction, failFuncti
 				}
 				else {
 					// execute fail function
-					failFunction(response.statusCode);
+					failFunction(body, response.statusCode);
 				}
 			}
 			else {
@@ -41,7 +41,7 @@ function sendPostBodyRequest(url, headers, postBody, successFunction, failFuncti
 				}
 				else {
 					// execute fail function
-					failFunction(response.statusCode);
+					failFunction(body, response.statusCode);
 				}
 			}
 			else {
@@ -66,7 +66,7 @@ function sendGetRequest(url, headers, successFunction, failFunction, noResponseF
 				}
 				else {
 					// execute fail function
-					failFunction(response.statusCode);
+					failFunction(body, response.statusCode);
 				}
 			}
 			else {
