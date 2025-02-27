@@ -219,12 +219,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 					test.headers[key] = responseValues[trimmedValue];
 				}
 			}
-			else if (inputValues[key]){
-				test.headers[key] = inputValues[key];
-			}
-			else if (responseValues[key]){
-				test.headers[key] = responseValues[key];
-			}
 		}
 	}
 
@@ -386,12 +380,6 @@ function recursivelyRunTests(tests, index, callbackFunction){
 					else if (responseValues[trimmedValue]){
 						test.form[key] = responseValues[trimmedValue];
 					}
-				}
-				else if (inputValues[key]){
-					test.form[key] = inputValues[key];
-				}
-				else if (responseValues[key]){
-					test.form[key] = responseValues[key];
 				}
 			}	
 		}
