@@ -28,9 +28,9 @@
 					"type" : "text",
 					"content" : "Xjd7jBFlk09Sgj-3kGkadfg43@fdG-VGahs"
 				},
-				"responseValues" : [
-					"sessionToken"
-				],
+				"responseValues" : {
+					"sessionToken" : "sessionToken"
+				},
 				"nfr" : {
 					"maxResponseTime" : 200
 				}
@@ -136,9 +136,9 @@
 					"type" : "text",
 					"content" : "Xjd7jBFlk09Sgj-3kGkadfg43@fdG-VGahs"
 				},
-				"responseValues" : [
-					"sessionToken"
-				],
+				"responseValues" : {
+					"sessionToken" : "sessionToken"
+				},
 				"nfr" : {
 					"maxResponseTime" : 200
 				}

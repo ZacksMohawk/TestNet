@@ -561,10 +561,12 @@ function storeResponseValues(test, responseJson){
 	if (test.responseValues == null){
 		return;
 	}
-	for (let index = 0; index < test.responseValues.length; index++){
-		let key = test.responseValues[index];
+	let responseValueKeys = Object.keys(test.responseValues);
+	for (let index = 0; index < responseValueKeys.length; index++){
+		let key = responseValueKeys[index];
+		let value = test.responseValues[key];
 		if (responseJson[key]){
-			responseValues[key] = responseJson[key];
+			responseValues[value] = responseJson[key];
 		}
 	}
 }
@@ -573,11 +575,14 @@ function storeTextResponse(test, body){
 	if (test.responseValues == null){
 		return;
 	}
-	if (test.responseValues.length > 1){
+	let responseValueKeys = Object.keys(test.responseValues);
+	if (responseValueKeys > 1){
 		Logger.log("    🟥 Cannot capture multiple values for a TEXT response: " + test.responseValues.toString());
 		return;
 	}
-	responseValues[test.responseValues[0]] = body;
+	let key = responseValueKeys[0];
+	let value = test.responseValues[key];
+	responseValues[value] = body;
 }
 
 function recordSuccess(test){
