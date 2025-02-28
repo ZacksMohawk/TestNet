@@ -426,7 +426,13 @@ function checkJsonResponse(body, test, expectedResponse, statusCode, tests, inde
 		recordFailure(test, null, null, "Unexpected status code: " + statusCode);
 	}
 
-	let responseJson = JSON.parse(body);
+	let responseJson;
+	try {
+		responseJson = JSON.parse(body);
+	}
+	catch (error){
+		responseJson = body;
+	}
 	storeResponseValues(test, responseJson);
 
 	recursivelyRunTests(tests, index + 1, callbackFunction);
@@ -475,7 +481,14 @@ function handleFailResponse(testStartTime, body, test, expectedResponse, statusC
 }
 
 function matchJson(body, test, expectedResponse, statusCode){
-	let jsonObject = JSON.parse(body);
+	let jsonObject
+	try {
+		jsonObject = JSON.parse(body);
+	}
+	catch (error){
+		recordFailure(test, body, null, "Response not valid JSON");
+		return;
+	}
 	if (MATCH_TYPE_PARTIAL == expectedResponse.matchType){
 		let mismatchFound = false;
 		let expectedResponseKeys = Object.keys(expectedResponse.content);
@@ -489,7 +502,7 @@ function matchJson(body, test, expectedResponse, statusCode){
 			}
 		}
 		if (mismatchFound){
-			recordFailure(test, body, null, "Expected content does not match2");
+			recordFailure(test, body, null, "Expected content does not match");
 		}
 		else {
 			recordSuccess(test);
