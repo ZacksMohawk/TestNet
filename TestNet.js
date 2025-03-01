@@ -407,24 +407,7 @@ function checkTextResponse(body, test, expectedResponse, statusCode, tests, inde
 }
 
 function checkJsonResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction){
-	if (expectedResponse.content != null){
-		if (!validateMatchType(expectedResponse)){
-			recordFailure(test, null, null, "Invalid matchType: " + expectedResponse.matchType);
-			recursivelyRunTests(tests, index + 1, callbackFunction);
-			return;
-		}
-		test.response = body;
-		matchJson(body, test, expectedResponse, statusCode);
-	}
-	else if (expectedResponse.code == null){
-		recordFailure(test, null, null, "No expected status code provided");
-	}
-	else if (statusCode == expectedResponse.code){
-		recordSuccess(test);
-	}
-	else {
-		recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-	}
+	handleResponse(body, test, expectedResponse, statusCode);
 
 	let responseJson;
 	try {
@@ -442,42 +425,44 @@ function handleFailResponse(testStartTime, body, test, expectedResponse, statusC
 	let responseTime = Date.now() - testStartTime;
 	test['responseTime'] = responseTime;
 
-	if (expectedResponse.code != null){
-		if (expectedResponse.code == statusCode){
-			if (expectedResponse.content != null){
+	handleResponse(body, test, expectedResponse, statusCode);
+	recursivelyRunTests(tests, index + 1, callbackFunction);
+}
 
-				test.response = body;
+function handleResponse(body, test, expectedResponse, statusCode){
+	if (expectedResponse.code == null){
+		recordFailure(test, null, 0, "No expected status code provided");
+	}
+	else if (expectedResponse.code == statusCode){
+		if (expectedResponse.content != null){
 
-				if (expectedResponse.type == TYPE_JSON){
-					if (!validateMatchType(expectedResponse)){
-						delete test.response;
-						recordFailure(test, null, null, "Invalid matchType: " + expectedResponse.matchType);
-						recursivelyRunTests(tests, index + 1, callbackFunction);
-						return;
-					}
-					matchJson(body, test, expectedResponse, statusCode);
+			test.response = body;
+
+			if (expectedResponse.type == TYPE_JSON){
+				if (!validateMatchType(expectedResponse)){
+					delete test.response;
+					recordFailure(test, null, 0, "Invalid matchType: " + expectedResponse.matchType);
+					recursivelyRunTests(tests, index + 1, callbackFunction);
+					return;
 				}
-				else if (expectedResponse.content == body){
-					if (expectedResponse.code == null || statusCode == expectedResponse.code){
-						recordSuccess(test);
-					}
-					else {
-						recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-					}
+				matchJson(body, test, expectedResponse, statusCode);
+			}
+			else if (expectedResponse.content == body){
+				if (expectedResponse.code == null || statusCode == expectedResponse.code){
+					recordSuccess(test);
 				}
 				else {
-					recordFailure(test, body, null, "Expected content does not match");
+					recordFailure(test, null, null, "Unexpected status code: " + statusCode);
 				}
 			}
-		}
-		else {
-			recordFailure(test, null, null, "Unexpected status code: " + statusCode);
+			else {
+				recordFailure(test, body, null, "Expected content does not match");
+			}
 		}
 	}
 	else {
-		recordFailure(test, null, statusCode);
+		recordFailure(test, null, null, "Unexpected status code: " + statusCode);
 	}
-	recursivelyRunTests(tests, index + 1, callbackFunction);
 }
 
 function matchJson(body, test, expectedResponse, statusCode){
@@ -577,12 +562,18 @@ function checkNfrs(test){
 }
 
 function recordFailure(test, body, errorCode, customMessage){
-	Logger.log("🔴 [" + (test.type ? test.type : '?') + " " + test.url + "] " + test.title + 
-		(errorCode ? ' [ERROR ' + errorCode + ']' : '') + 
-		(customMessage ? ' - ' + customMessage : '') + 
+	if (errorCode == 0){
+		Logger.log("⛔️ [" + (test.type ? test.type : "?") + " " + test.url + "] " + test.title + 
+			" [INVALID TEST]" + 
+			(customMessage ? " - " + customMessage : ""));
+		return;
+	}
+	Logger.log("🔴 [" + (test.type ? test.type : "?") + " " + test.url + "] " + test.title + 
+		(errorCode ? " [ERROR " + errorCode + "]" : "") + 
+		(customMessage ? " - " + customMessage : "") + 
 		(test.responseTime ? "   " + test.responseTime + "ms" : ""));
 	failedTests.push(test);
-	if (test.response != null){
+	if (test.response != null && test.expected.content != test.response){
 		Logger.log("  Expected ---> " + test.expected.content);
 		Logger.log("  Actual ---> " + test.response);
 	}
