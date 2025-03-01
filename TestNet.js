@@ -238,32 +238,11 @@ function recursivelyRunTests(tests, index, callbackFunction){
 		RequestUtils.sendGetRequest(test.url, test.headers ? test.headers : {}, 
 			// successFunction
 			function(body, statusCode){
-				let responseTime = Date.now() - testStartTime;
-				test['responseTime'] = responseTime;
-
-				if (expectedResponse.type == null){
-					if (expectedResponse.code == null){
-						recordFailure(test, null, null, "No expected status code provided");
-					}
-					else if (statusCode == expectedResponse.code){
-						recordSuccess(test);
-					}
-					else {
-						recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-					}
-					recursivelyRunTests(tests, index + 1, callbackFunction);
-				}
-
-				if (expectedResponse.type == TYPE_TEXT){
-					checkTextResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction);
-				}
-				else if (expectedResponse.type == TYPE_JSON){
-					checkJsonResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction);
-				}
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
 			},
 			// failFunction
 			function(body, statusCode){
-				handleFailResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
 			},
 			// noResponseFunction
 			function(){
@@ -312,33 +291,11 @@ function recursivelyRunTests(tests, index, callbackFunction){
 		postFunction(test.url, test.headers ? test.headers : {}, postData, 
 			// successFunction
 			function(body, statusCode){
-				let responseTime = Date.now() - testStartTime;
-				test['responseTime'] = responseTime;
-
-				if (expectedResponse.type == null){
-					if (expectedResponse.code == null){
-						recordFailure(test, null, null, "No expected status code provided");
-					}
-					else if (statusCode == expectedResponse.code){
-						recordSuccess(test);
-					}
-					else {
-						recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-					}
-					recursivelyRunTests(tests, index + 1, callbackFunction);
-					return;
-				}
-
-				if (expectedResponse.type == TYPE_TEXT){
-					checkTextResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction);
-				}
-				else if (expectedResponse.type == TYPE_JSON){
-					checkJsonResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction);
-				}
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
 			},
 			// failFunction
 			function(body, statusCode){
-				handleFailResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
 			},
 			// noResponseFunction
 			function(){
@@ -385,51 +342,10 @@ function processUrlParams(url){
 	return preParamSection + "?" + rebuiltParamSection;
 }
 
-function checkTextResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction){
-	if (expectedResponse.content != null){
-		test.response = body;
-		if (expectedResponse.content == body){
-			if (expectedResponse.code == null || statusCode == expectedResponse.code){
-				recordSuccess(test);
-			}
-			else {
-				recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-			}
-		}
-		else {
-			recordFailure(test, body, null, "Expected content does not match");
-		}
-	}
-
-	storeTextResponse(test, body);
-
-	recursivelyRunTests(tests, index + 1, callbackFunction);
-}
-
-function checkJsonResponse(body, test, expectedResponse, statusCode, tests, index, callbackFunction){
-	handleResponse(body, test, expectedResponse, statusCode);
-
-	let responseJson;
-	try {
-		responseJson = JSON.parse(body);
-	}
-	catch (error){
-		responseJson = body;
-	}
-	storeResponseValues(test, responseJson);
-
-	recursivelyRunTests(tests, index + 1, callbackFunction);
-}
-
-function handleFailResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction){
+function handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction){
 	let responseTime = Date.now() - testStartTime;
 	test['responseTime'] = responseTime;
 
-	handleResponse(body, test, expectedResponse, statusCode);
-	recursivelyRunTests(tests, index + 1, callbackFunction);
-}
-
-function handleResponse(body, test, expectedResponse, statusCode){
 	if (expectedResponse.code == null){
 		recordFailure(test, null, 0, "No expected status code provided");
 	}
@@ -463,6 +379,22 @@ function handleResponse(body, test, expectedResponse, statusCode){
 	else {
 		recordFailure(test, null, null, "Unexpected status code: " + statusCode);
 	}
+
+	if (expectedResponse.type == TYPE_JSON){
+		let responseJson;
+		try {
+			responseJson = JSON.parse(body);
+		}
+		catch (error){
+			responseJson = body;
+		}
+		storeResponseValues(test, responseJson);
+	}
+	else {
+		storeTextResponse(test, body);
+	}
+
+	recursivelyRunTests(tests, index + 1, callbackFunction);
 }
 
 function matchJson(body, test, expectedResponse, statusCode){
