@@ -352,27 +352,19 @@ function handleResponse(testStartTime, body, test, expectedResponse, statusCode,
 	else if (expectedResponse.code == statusCode){
 		if (expectedResponse.content != null){
 
+			if (!validateMatchType(expectedResponse)){
+				recordFailure(test, null, 0, "Invalid matchType: " + expectedResponse.matchType);
+				recursivelyRunTests(tests, index + 1, callbackFunction);
+				return;
+			}
+
 			test.response = body;
 
 			if (expectedResponse.type == TYPE_JSON){
-				if (!validateMatchType(expectedResponse)){
-					delete test.response;
-					recordFailure(test, null, 0, "Invalid matchType: " + expectedResponse.matchType);
-					recursivelyRunTests(tests, index + 1, callbackFunction);
-					return;
-				}
 				matchJson(body, test, expectedResponse, statusCode);
 			}
-			else if (expectedResponse.content == body){
-				if (expectedResponse.code == null || statusCode == expectedResponse.code){
-					recordSuccess(test);
-				}
-				else {
-					recordFailure(test, null, null, "Unexpected status code: " + statusCode);
-				}
-			}
 			else {
-				recordFailure(test, body, null, "Expected content does not match");
+				matchText(body, test, expectedResponse, statusCode);
 			}
 		}
 	}
@@ -426,6 +418,21 @@ function matchJson(body, test, expectedResponse, statusCode){
 		}
 	}
 	else if (JSON.stringify(expectedResponse.content) == body){
+		if (expectedResponse.code == null || statusCode == expectedResponse.code){
+			recordSuccess(test);
+		}
+		else {
+			recordFailure(test, null, null, "Unexpected status code: " + statusCode);
+		}
+	}
+	else {
+		recordFailure(test, body, null, "Expected content does not match");
+	}
+}
+
+function matchText(body, test, expectedResponse, statusCode){
+	if ((MATCH_TYPE_PARTIAL == expectedResponse.matchType && body.includes(expectedResponse.content)) 
+		  || expectedResponse.content == body){
 		if (expectedResponse.code == null || statusCode == expectedResponse.code){
 			recordSuccess(test);
 		}
