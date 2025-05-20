@@ -39,6 +39,11 @@ if (process.argv.indexOf("-folderPath") != -1){
 	localTestDefFilePath = folderPath + "/" + testDefFilePath;
 }
 
+let testFilePath;
+if (process.argv.indexOf("-testFilePath") != -1){
+	testFilePath = process.argv[process.argv.indexOf("-testFilePath") + 1];
+}
+
 function chooseTests(){
 	if (fs.existsSync(localTestDefFilePath)){
 		Logger.log("Using local test.def.json config");
@@ -81,6 +86,11 @@ function chooseTests(){
 	let testChoiceKey = testNameArray[testChoiceIndex - 1];
 
 	chosenTestSet = testDefinitionData[testChoiceKey];
+
+	beginTests(chosenTestSet, testChoiceKey);
+}
+
+function beginTests(chosenTestSet, testChoiceKey){
 	if (chosenTestSet.allowSelfSigned){
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 	}
@@ -567,6 +577,17 @@ function displayTestResults(){
 }
 
 function handleStartup(){
+	if (testFilePath){
+		try {
+			chosenTestSet = JSON.parse(fs.readFileSync(testFilePath, 'utf8'));
+			beginTests(chosenTestSet, testFilePath);
+		}
+		catch (error){
+			Logger.log("Invalid test file");
+			process.exit(0);
+		}
+		return;
+	}
 	chooseTests();
 }
 
