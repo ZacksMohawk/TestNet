@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.9";
+global.version = "1.0.10";
 
 const fs = require('fs');
 const prompt = require("prompt-sync")();
@@ -28,6 +28,9 @@ let chosenTestSet;
 let passedTests = [];
 let failedTests = [];
 let failedTestsFilePath = 'failed.json';
+
+let totalTests;
+let stopAfterFailure = false;
 
 let localTestDefFilePath;
 let folderPath;
@@ -82,6 +85,7 @@ function chooseTests(){
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 	}
 	let tests = preProcessTests(chosenTestSet);
+	totalTests = tests.length;
 
 	gatherInputValues(chosenTestSet, testChoiceKey);
 
@@ -182,7 +186,7 @@ function loadStoredInputValues(){
 }
 
 function recursivelyRunTests(tests, index, callbackFunction){
-	if (index >= tests.length){
+	if (index >= tests.length || stopAfterFailure){
 		callbackFunction();
 		return;
 	}
@@ -367,6 +371,9 @@ function handleResponse(testStartTime, body, test, expectedResponse, statusCode,
 				matchText(body, test, expectedResponse, statusCode);
 			}
 		}
+		else {
+			recordSuccess(test);
+		}
 	}
 	else {
 		recordFailure(test, null, null, "Unexpected status code: " + statusCode);
@@ -516,13 +523,26 @@ function recordFailure(test, body, errorCode, customMessage){
 		Logger.log("  Expected ---> " + test.expected.content);
 		Logger.log("  Actual ---> " + test.response);
 	}
+	if (test.stopOnFail){
+		stopAfterFailure = true;
+		Logger.log("  ---> Stopping tests after failure", "FgRed");
+	}
 }
 
 function displayTestResults(){
-	Logger.log("\nAll tests run\n");
+	let totalCompletedTests = passedTests.length + failedTests.length;
+	let skippedTests = totalTests - totalCompletedTests;
+	if (skippedTests == 0){
+		Logger.log("\nAll tests run\n");
+	}
+	else {
+		Logger.log("\n" + totalCompletedTests + " test" + (totalCompletedTests != 1 ? "s" : "") + " run");
+		Logger.log("(" + skippedTests + " test" + (skippedTests != 1 ? "s" : "") + " skipped)\n");
+	}
 
 	let percentagePassed = parseInt((passedTests.length / (passedTests.length + failedTests.length)) * 100);
-	Logger.log("Tests passed: " + passedTests.length + " / " + (passedTests.length + failedTests.length) + " (" + percentagePassed + "%)\n");
+	let resultReadoutColour = percentagePassed == 100 ? "FgGreen" : "FgRed";
+	Logger.log("Tests passed: " + passedTests.length + " / " + (passedTests.length + failedTests.length) + " (" + percentagePassed + "%)\n", resultReadoutColour);
 
 	if (failedTests.length > 0){
 		let testsToReRun = failedTests.slice(0);
