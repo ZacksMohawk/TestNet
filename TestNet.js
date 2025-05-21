@@ -1,5 +1,5 @@
 global.appType = "TestNet";
-global.version = "1.0.10";
+global.version = "1.0.11";
 
 const fs = require('fs');
 const prompt = require("prompt-sync")();
@@ -12,6 +12,7 @@ Logger.log();
 
 const GET = "GET";
 const POST = "POST";
+const DELETE = "DELETE";
 const TYPE_TEXT = "text";
 const TYPE_JSON = "json";
 
@@ -94,6 +95,24 @@ function beginTests(chosenTestSet, testChoiceKey){
 	if (chosenTestSet.allowSelfSigned){
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 	}
+
+	if (chosenTestSet.message){
+		Logger.log("\n" + chosenTestSet.message);
+	}
+	if (chosenTestSet.confirm){
+		Logger.log("\n" + chosenTestSet.confirm);
+		let confirm = prompt("Confirm (y/n): ");
+		if (!confirm){
+			Logger.log("Exiting");
+			process.exit(0);
+		}
+		confirm = confirm.trim().toLowerCase();
+		if (confirm != 'y'){
+			Logger.log("Exiting");
+			process.exit(0);
+		}
+	}
+
 	let tests = preProcessTests(chosenTestSet);
 	totalTests = tests.length;
 
@@ -210,7 +229,7 @@ function recursivelyRunTests(tests, index, callbackFunction){
 		return;
 	}
 
-	if (![GET, POST].includes(test.type)){
+	if (![GET, POST, DELETE].includes(test.type)){
 		recordFailure(test, null, null, "Invalid request type: " + test.type);
 		recursivelyRunTests(tests, index + 1, callbackFunction);
 		return;
@@ -326,34 +345,62 @@ function recursivelyRunTests(tests, index, callbackFunction){
 			}
 		);
 	}
+	else if (test.type == DELETE){
+		RequestUtils.sendDeleteRequest(test.url, test.headers ? test.headers : {}, 
+			// successFunction
+			function(body, statusCode){
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
+			},
+			// failFunction
+			function(body, statusCode){
+				handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction);
+			},
+			// noResponseFunction
+			function(){
+				let responseTime = Date.now() - testStartTime;
+				test['responseTime'] = responseTime;
+
+				if (expectedResponse.code != null && expectedResponse.code == 521){
+					recordSuccess(test);
+				}
+				else {
+					recordFailure(test, null, 521);
+				}
+				recursivelyRunTests(tests, index + 1, callbackFunction);
+			}
+		);
+	}
 }
 
 function processUrlParams(url){
-	if (!url.includes("?")){
-		return url;
-	}
-	let preParamSection = url.substr(0, url.indexOf('?'));
-	let paramSection = url.substr(url.indexOf('?') + 1, url.length);
-	let paramSectionArray = paramSection.split("&");
-	let rebuiltParamSection = "";
-	for (let index = 0; index < paramSectionArray.length; index++){
-		let paramPair = paramSectionArray[index].split("=");
-		let paramValue = paramPair[1];
-		if (paramValue.startsWith("<") && paramValue.endsWith(">")){
-			let trimmedParamValue = paramValue.substr(1, paramValue.length - 2);
-			if (inputValues[trimmedParamValue]){
-				paramPair[1] = inputValues[trimmedParamValue];
-			}
-			else if (responseValues[trimmedParamValue]){
-				paramPair[1] = responseValues[trimmedParamValue];
-			}
+	while (url.includes("<")){
+		let preSection = url.substring(0, url.indexOf("<"));
+		let postSection = url.substring(url.indexOf("<"), url.length);
+
+		if (!postSection.includes(">")){
+			Logger.error("Incorrectly formatted URL");
+			return url;
 		}
-		if (rebuiltParamSection){
-			rebuiltParamSection += "&";
+
+		let targetSection = postSection.substring(0, postSection.indexOf(">") + 1);
+		postSection = postSection.substring(postSection.indexOf(">") + 1, postSection.length);
+
+		let trimmedTargetValue = targetSection.substr(1, targetSection.length - 2);
+
+		if (inputValues[trimmedTargetValue]){
+			targetSection = inputValues[trimmedTargetValue];
 		}
-		rebuiltParamSection += paramPair[0] + "=" + paramPair[1];
+		else if (responseValues[trimmedTargetValue]){
+			targetSection = responseValues[trimmedTargetValue];
+		}
+		else {
+			Logger.error("No matching value for param: " + targetSection);
+			return url;
+		}
+
+		url = preSection + targetSection + postSection;
 	}
-	return preParamSection + "?" + rebuiltParamSection;
+	return url;
 }
 
 function handleResponse(testStartTime, body, test, expectedResponse, statusCode, tests, index, callbackFunction){

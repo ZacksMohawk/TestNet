@@ -77,8 +77,34 @@ function sendGetRequest(url, headers, successFunction, failFunction, noResponseF
 	);
 }
 
+function sendDeleteRequest(url, headers, successFunction, failFunction, noResponseFunction){
+	request.delete(
+		url,
+		{
+			headers: headers
+		},
+		function (error, response, body) {
+			if (response){
+				if (response.statusCode == 200){
+					// execute the provided success function
+					successFunction(body, response.statusCode);
+				}
+				else {
+					// execute fail function
+					failFunction(body, response.statusCode);
+				}
+			}
+			else {
+				// execute no response function
+				noResponseFunction();
+			}
+		}
+	);
+}
+
 module.exports = {
 	sendPostFormRequest: sendPostFormRequest,
 	sendPostBodyRequest: sendPostBodyRequest,
-	sendGetRequest: sendGetRequest
+	sendGetRequest: sendGetRequest,
+	sendDeleteRequest: sendDeleteRequest
 }
